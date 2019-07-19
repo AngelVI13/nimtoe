@@ -7,6 +7,7 @@ type Mark* = enum
   markO = -1, markNoPlayer = 0, markX = 1
 
 const
+  NoWinner* = -1.0
   Loss* = 0.0
   Draw* = 0.5
   Win* = 1.0

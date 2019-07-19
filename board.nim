@@ -1,4 +1,5 @@
-from defines import BoardSize, Rows, Mark, getResultLines, ResultLines
+import defines
+import system
 
 
 type Board = object
@@ -31,6 +32,29 @@ method takeMove(this: var Board) {.base.} =
   else:
     echo "History is empty"
 
+method evaluateLines(this: Board, lines: ResultLines, playerJm: Mark): float {.base.} =
+  for i in low(lines)..high(lines):
+    var line = lines[i]
+
+    result = 0
+    for j in low(line)..high(line):
+      result += float(this.pos[line[j]])
+
+    if int(abs(result)) == Rows:
+      var potential_winner = line[0]
+      if potential_winner == int(playerJm):
+        return Win
+      else:
+        return Loss
+
+method getResult(this: Board, playerJM: Mark): float {.base.} =
+  for i in low(this.resultLines)..high(this.resultLines):
+    var line_eval = this.evaluateLines(this.resultLines[i], playerJM)
+    if line_eval != NoWinner: return line_eval
+
+  if len(this.getMoves()) == 0: return Draw
+
+  return NoWinner
 
 proc createBoard*(): Board =
   result = Board(playerJustMoved: markO, resultLines: getResultLines())
@@ -41,3 +65,10 @@ when isMainModule:
       b = createBoard()
 
   echo b.getMoves()
+  b.makeMove(0)
+  b.makeMove(1)
+  b.makeMove(3)
+  b.makeMove(4)
+  b.makeMove(6)
+  echo b.pos
+  echo b.getResult(b.playerJustMoved)
