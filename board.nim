@@ -1,5 +1,6 @@
 import defines
 import system
+import sequtils
 
 
 type Board = object
@@ -9,15 +10,15 @@ type Board = object
   resultLines: array[Rows, ResultLines]
 
 method getMoves(this: Board): seq[int] {.base.} =
-  for i in low(this.pos)..high(this.pos):
-    if this.pos[i] == markNoPlayer:
+  for i, square in this.pos:
+    if square == markNoPlayer:
       result.add(i)
 
 method makeMove(this: var Board, move: int) {.base.} =
   this.playerJustMoved = case this.playerJustMoved:
-  of markO: markX
-  of markX: markO
-  else: markNoPlayer
+    of markO: markX
+    of markX: markO
+    else: markNoPlayer
 
   this.pos[move] = this.playerJustMoved
   this.history.add(move)
@@ -33,23 +34,25 @@ method takeMove(this: var Board) {.base.} =
     echo "History is empty"
 
 method evaluateLines(this: Board, lines: ResultLines, playerJm: Mark): float {.base.} =
-  for i in low(lines)..high(lines):
-    var line = lines[i]
-
+  for line in lines:
+    # last line in diagonal lines is empty i.e. has indexes of -1 => skip it
+    if any(line, proc (x: int): bool = return x < 0) == true:
+      continue
+    
     result = 0
-    for j in low(line)..high(line):
-      result += float(this.pos[line[j]])
-
+    for idx in line:
+      result += float(this.pos[idx])
+    
     if int(abs(result)) == Rows:
-      var potential_winner = line[0]
-      if potential_winner == int(playerJm):
-        return Win
-      else:
-        return Loss
+      var potential_winner = this.pos[line[0]]
+      result = if potential_winner == playerJm: Win else: Loss
+      return result
+  
+  return NoWinner
 
 method getResult(this: Board, playerJM: Mark): float {.base.} =
-  for i in low(this.resultLines)..high(this.resultLines):
-    var line_eval = this.evaluateLines(this.resultLines[i], playerJM)
+  for line_combo in this.resultLines:
+    var line_eval = this.evaluateLines(line_combo, playerJM)
     if line_eval != NoWinner: return line_eval
 
   if len(this.getMoves()) == 0: return Draw
