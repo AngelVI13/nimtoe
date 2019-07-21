@@ -35,7 +35,7 @@ method getMoves*(this: Board): seq[int] {.base.} =
     if square == markNoPlayer:
       result.add(i)
 
-method makeMove(this: var Board, move: int) {.base.} =
+method makeMove*(this: var Board, move: int) {.base.} =
   this.playerJustMoved = case this.playerJustMoved:
     of markO: markX
     of markX: markO
@@ -44,13 +44,19 @@ method makeMove(this: var Board, move: int) {.base.} =
   this.pos[move] = this.playerJustMoved
   this.history.add(move)
 
-method takeMove(this: var Board) {.base.} =
+method takeMove*(this: var Board) {.base.} =
   var historyLength = len(this.history)
 
   if historyLength > 0:
     # take pop last element from sequence and return it
     var lastElement = this.history.pop()
     this.pos[lastElement] = markNoPlayer
+
+    # update player just moved
+    this.playerJustMoved = case this.playerJustMoved:
+      of markO: markX
+      of markX: markO
+      else: markNoPlayer
   else:
     echo "History is empty"
 
@@ -71,7 +77,7 @@ method evaluateLines(this: Board, lines: ResultLines, playerJm: Mark): float {.b
   
   return NoWinner
 
-method getResult(this: Board, playerJM: Mark): float {.base.} =
+method getResult*(this: Board, playerJM: Mark): float {.base.} =
   for line_combo in this.resultLines:
     var line_eval = this.evaluateLines(line_combo, playerJM)
     if line_eval != NoWinner: return line_eval
