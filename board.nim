@@ -4,9 +4,9 @@ import sequtils
 import strformat
 
 
-type Board = object
+type Board* = object
   pos: array[BoardSize, Mark]
-  playerJustMoved: Mark
+  playerJustMoved*: Mark
   history: seq[int]
   resultLines: array[Rows, ResultLines]
 
@@ -30,7 +30,7 @@ method toString(this: Board): string {.base.} =
 
   result = fmt("\n\tPlayer to move {playerToMove}\n\n{result}")
 
-method getMoves(this: Board): seq[int] {.base.} =
+method getMoves*(this: Board): seq[int] {.base.} =
   for i, square in this.pos:
     if square == markNoPlayer:
       result.add(i)
@@ -48,9 +48,9 @@ method takeMove(this: var Board) {.base.} =
   var historyLength = len(this.history)
 
   if historyLength > 0:
-    var lastIdx = historyLength - 1
-    this.pos[this.history[lastIdx]] = markNoPlayer
-    this.history.delete(lastIdx)
+    # take pop last element from sequence and return it
+    var lastElement = this.history.pop()
+    this.pos[lastElement] = markNoPlayer
   else:
     echo "History is empty"
 
