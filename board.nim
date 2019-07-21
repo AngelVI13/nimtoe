@@ -1,6 +1,7 @@
 import defines
 import system
 import sequtils
+import strformat
 
 
 type Board = object
@@ -8,6 +9,26 @@ type Board = object
   playerJustMoved: Mark
   history: seq[int]
   resultLines: array[Rows, ResultLines]
+
+method toString(this: Board): string {.base.} =
+  for row_line in this.resultLines[1]:
+    var line = ""
+    for idx in row_line:
+      var mark = case this.pos[idx]:
+        of markX: "X"
+        of markO: "O"
+        of markNoPlayer: "-"
+
+      var formatted_mark = fmt"| {mark} "
+      line.add(formatted_mark)
+    result.add(fmt("\t{line}|\n"))
+  
+  var playerToMove = case this.playerJustMoved:
+    of markX: "O"
+    of markO: "X"
+    of markNoPlayer: "-"
+
+  result = fmt("\n\tPlayer to move {playerToMove}\n\n{result}")
 
 method getMoves(this: Board): seq[int] {.base.} =
   for i, square in this.pos:
@@ -62,6 +83,11 @@ method getResult(this: Board, playerJM: Mark): float {.base.} =
 proc createBoard*(): Board =
   result = Board(playerJustMoved: markO, resultLines: getResultLines())
 
+proc `$`*(b: Board): string =
+  ## Implements a dispatcher for $ operator on Board object
+  ## In this way you can display an instance of Board just by
+  ## `echo b` where b is an instance of Board
+  result = b.toString()
 
 when isMainModule:
   var
@@ -75,3 +101,4 @@ when isMainModule:
   b.makeMove(6)
   echo b.pos
   echo b.getResult(b.playerJustMoved)
+  echo b
