@@ -22,7 +22,7 @@ method toString(this: Board): string {.base.} =
       var formatted_mark = fmt"| {mark} "
       line.add(formatted_mark)
     result.add(fmt("\t{line}|\n"))
-  
+
   var playerToMove = case this.playerJustMoved:
     of markX: "O"
     of markO: "X"
@@ -65,16 +65,16 @@ method evaluateLines(this: Board, lines: ResultLines, playerJm: Mark): float {.b
     # last line in diagonal lines is empty i.e. has indexes of -1 => skip it
     if any(line, proc (x: int): bool = return x < 0) == true:
       continue
-    
+
     result = 0
     for idx in line:
       result += float(this.pos[idx])
-    
+
     if int(abs(result)) == Rows:
       var potential_winner = this.pos[line[0]]
       result = if potential_winner == playerJm: Win else: Loss
       return result
-  
+
   return NoWinner
 
 method getResult*(this: Board, playerJM: Mark): float {.base.} =

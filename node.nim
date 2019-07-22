@@ -25,32 +25,29 @@ method addChild*(this: Node, move: int, state: Board): Node {.base.} =
   result.parent = this
   result.untriedMoves = state.getMoves()
   result.playerJustMoved = state.playerJustMoved
-  
+
   this.childNodes.add(result)
 
   var moveIdx = -1
   for idx, m in this.untriedMoves:
     if move == m:
       moveIdx = idx
-  
+
   if moveIdx != -1:
     this.untriedMoves.delete(moveIdx)
   else:
     echo fmt("Couldn't find move in untried moves {move}")
 
-proc ucb1(n: Node): float =
-  result = (n.wins/n.visits) + sqrt(2*ln(n.visits)/n.visits)
-    
-proc ucb1Compare(x, y: Node): int =
-  if ucb1(x) < ucb1(y): -1 else: 1
+method ucb1(this:Node, n: Node): float {.base.} =
+  result = (n.wins/n.visits) + sqrt(2*ln(this.visits)/n.visits)
 
 method uctSelectChild*(this: Node): Node {.base.} =
-  var sortedNodes = sorted(this.childNodes, ucb1Compare)
-  echo "Sorted child nodes"
-  for n in sortedNodes:
-    echo ucb1(n)
-  echo "End of child nodes"
-  result = sortedNodes[^1]
+  # Find most promising child by comparing their ucb1 scores
+  # If score is bigger than the biggest current score -> update current biggest
+  result = this.childNodes[0]
+  for child in this.childNodes:
+    if this.ucb1(child) > this.ucb1(result):
+      result = child
 
 proc createRootNode*(state: Board): Node =
   new(result)
