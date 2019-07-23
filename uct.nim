@@ -6,11 +6,16 @@ import algorithm
 import strformat
 
 
-# randomize()  # generates a random seed
+randomize()  # generates a random seed
 
-type Score = tuple
-  wins: float32
-  visits: float32
+type
+  Score = tuple
+    wins: float32
+    visits: float32
+
+  RankedMove = tuple
+    score: float
+    move: int
 
 proc visitsCmp(x,y: Node): int =
   if x.visits < y.visits: -1 else: 1
@@ -64,6 +69,26 @@ proc uct*(rootstate: Board, itermax: int): Score =
   var sortedNodes = sorted(rootnode.childNodes, visitsCmp)
   var bestNode = sortedNodes[^1]
   result = (wins: bestNode.wins, visits: bestNode.visits)
+
+proc getEngineMove*(state: Board, simulations: int): int =
+  var availableMoves = state.getMoves()
+  var simPerMove = int(simulations / len(availableMoves))
+
+  var bestMove: RankedMove = (score: 1.0, move: BoardSize + 1)
+  for move in availableMoves:
+    var b = state
+    b.makeMove(move)
+    var score = uct(b, itermax=simPerMove)
+    var move_score = score.wins/score.visits
+    echo fmt("Move: {move} : {move_score}")
+    # here the move_score refers to the best enemy reply
+    # therefore we want to minimize that i.e. chose the move
+    # which leads to the lowest scored best enemy reply
+    if move_score < bestMove.score:
+      bestMove.score = move_score
+      bestMove.move = move
+
+  result = bestMove.move
 
 when isMainModule:
   import times
