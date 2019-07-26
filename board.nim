@@ -30,35 +30,41 @@ method toString(this: Board): string {.base.} =
 
   result = fmt("\n\tPlayer to move {playerToMove}\n\n{result}")
 
+# this is a static method
+method updatePlayerJustMoved*(this: Board, playerJM: Mark): Mark {.base.} =
+  result = case playerJM:
+    of markO: markX
+    of markX: markO
+    else: markNoPlayer
+
+# forward declaration
+method getResult*(this: Board, playerJM: Mark): float {.base.}
+
 method getMoves*(this: Board): seq[int] {.base.} =
+  if this.getResult(this.playerJustMoved) != NoWinner:
+    return result;
+
   for i, square in this.pos:
     if square == markNoPlayer:
       result.add(i)
 
 method makeMove*(this: var Board, move: int) {.base.} =
-  this.playerJustMoved = case this.playerJustMoved:
-    of markO: markX
-    of markX: markO
-    else: markNoPlayer
-
+  this.playerJustMoved = this.updatePlayerJustMoved(this.playerJustMoved)
   this.pos[move] = this.playerJustMoved
   this.history.add(move)
 
 method takeMove*(this: var Board) {.base.} =
   var historyLength = len(this.history)
 
-  if historyLength > 0:
+  if historyLength == 0:
+    echo "History is empty"
+  else:
     # take pop last element from sequence and return it
     var lastElement = this.history.pop()
     this.pos[lastElement] = markNoPlayer
 
     # update player just moved
-    this.playerJustMoved = case this.playerJustMoved:
-      of markO: markX
-      of markX: markO
-      else: markNoPlayer
-  else:
-    echo "History is empty"
+    this.playerJustMoved = this.updatePlayerJustMoved(this.playerJustMoved)
 
 method evaluateLines(this: Board, lines: ResultLines, playerJm: Mark): float {.base.} =
   for line in lines:
@@ -82,7 +88,7 @@ method getResult*(this: Board, playerJM: Mark): float {.base.} =
     var line_eval = this.evaluateLines(line_combo, playerJM)
     if line_eval != NoWinner: return line_eval
 
-  if len(this.getMoves()) == 0: return Draw
+  if all(this.pos, proc (x: Mark): bool = return x != markNoPlayer): return Draw
 
   return NoWinner
 

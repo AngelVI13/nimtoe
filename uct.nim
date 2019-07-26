@@ -78,9 +78,22 @@ proc getEngineMove*(state: Board, simulations: int): int =
   for move in availableMoves:
     var b = state
     b.makeMove(move)
-    var score = uct(b, itermax=simPerMove)
+
+    # Check for immediate result after this make_move()
+    # It is possible the game is already over by this point
+    # in which the value of the move should be immediately computed and
+    # put in the result from the view point of the enemy
+    # since here moves are evaluated from that viewpoint
+    var score: Score  # todo move this declaration outside of for loop
+    var enemy = b.updatePlayerJustMoved(b.playerJustMoved)
+    var game_result = b.getResult(enemy)
+    if game_result != NoWinner:
+      score = (wins: float32(game_result), visits: float32(1.0))
+    else:
+      score = uct(b, itermax=simPerMove)
+
     var move_score = score.wins/score.visits
-    echo fmt("Move: {move} : {move_score}")
+    echo fmt("Move: {move} : {move_score}, v: {score.visits} from {simPerMove}")
     # here the move_score refers to the best enemy reply
     # therefore we want to minimize that i.e. chose the move
     # which leads to the lowest scored best enemy reply
@@ -98,7 +111,7 @@ when isMainModule:
   for move in rootstate.getMoves():
     var state = rootstate
     state.makeMove(move)
-    var score = uct(state, itermax=50000)
-    echo fmt("Move: {move} : {score}, {score[0]/score[1]}%")
+    var score = uct(state, itermax=10000)
+    echo fmt("Move: {move} : {score}, {score.wins/score.visits}%")
 
   echo fmt("Elapsed time {cpuTime()-currentTime}")

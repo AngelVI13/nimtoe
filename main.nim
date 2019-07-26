@@ -17,7 +17,7 @@ when isMainModule:
       echo b
     else:
       echo "Engine thinking..."
-      var move = getEngineMove(b, 100000)
+      var move = getEngineMove(b, 200000)
       b.makeMove(move)
       echo fmt("Engine makes move {move}")
       echo b
