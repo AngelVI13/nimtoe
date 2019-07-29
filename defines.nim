@@ -30,6 +30,8 @@ proc getRowArray(columnArr: ResultLines): ResultLines =
 
 proc getDiagonalArray(rowArr: ResultLines): ResultLines =
   for i in 0..Rows-1:
+    # todo add for loop with a switch to make sure
+    # todo this code is really general Size
     result[0][i] = rowArr[i][i]  # left diagonal -> 0,0| 1,1| 2,2
     result[1][i] = rowArr[i][Rows-i-1]  # right diagonal 0,2 | 1,1| 2,0
     result[2][i] = -1
