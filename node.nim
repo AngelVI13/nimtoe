@@ -39,17 +39,22 @@ method addChild*(this: Node, move: int, state: Board): Node {.base.} =
   else:
     echo fmt("Couldn't find move in untried moves {move}")
 
-method ucb1(this:Node, n: Node): float {.base.} =
+method ucb1(this: Node, n: Node): float {.base.} =
   result = (n.wins/n.visits) + sqrt(2*ln(this.visits)/n.visits)
 
 method uctSelectChild*(this: Node): Node {.base.} =
   # Find most promising child by comparing their ucb1 scores
   # If score is bigger than the biggest current score -> update current biggest
-  # todo this is slow, it runst ucb1 twice for each child
-  result = this.childNodes[0]
-  for child in this.childNodes:
-    if this.ucb1(child) > this.ucb1(result):
-      result = child
+  var bestChildIndex = 0
+  var bestChildScore = 0.0
+
+  for idx, child in this.childNodes:
+    var childScore = this.ucb1(child)
+    if childScore > bestChildScore:
+      bestChildScore = childScore
+      bestChildIndex = idx
+
+  result = this.childNodes[bestChildIndex]
 
 proc createRootNode*(state: Board): Node =
   new(result)
