@@ -19,6 +19,7 @@ method update*(this: Node, game_result: float) {.base.} =
   this.visits += 1.0
   this.wins += game_result
 
+# Todo pointer to state ?
 method addChild*(this: Node, move: int, state: Board): Node {.base.} =
   new(result)
   result.move = move
@@ -44,6 +45,7 @@ method ucb1(this:Node, n: Node): float {.base.} =
 method uctSelectChild*(this: Node): Node {.base.} =
   # Find most promising child by comparing their ucb1 scores
   # If score is bigger than the biggest current score -> update current biggest
+  # todo this is slow, it runst ucb1 twice for each child
   result = this.childNodes[0]
   for child in this.childNodes:
     if this.ucb1(child) > this.ucb1(result):

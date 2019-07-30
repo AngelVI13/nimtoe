@@ -7,6 +7,12 @@ import strformat
 
 when isMainModule:
   var b = createBoard()
+  # echo getEngineMove(b, 10000)
+  # import times
+  # var currentTime = cpuTime()
+  # echo getEngineMove(b, 10000)
+  # echo fmt("Elapsed time {cpuTime()-currentTime}")
+
   while b.getResult(b.playerJustMoved) == NoWinner:
     if b.playerJustMoved == markO:
       var availableMoves = b.getMoves()
